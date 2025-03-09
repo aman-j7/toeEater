@@ -1,15 +1,12 @@
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 
-import Utils.GameUtils;
 import bots.EasyBot;
+import utils.GameUtils;
 
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 
-import static Utils.GameUtils.isStringEmptyAndBlank;
-import static java.lang.System.currentTimeMillis;
+import static utils.GameUtils.isStringEmptyAndBlank;
 import static java.lang.System.exit;
 
 public class Main {
@@ -77,46 +74,40 @@ public class Main {
         }
         System.out.println("Game floor looks like : ");
         boolean playersTurn = true;
+        int status;
         int coOrdinatePosition = 0;
         int checkWinnerAfterMoves = dimension + (dimension - 1) - 1;
-        String winner = "Both Lost";
+        String winner = null;
         while (totalState > 0) {
             printCurrentState(gamePosition);
-
             int movesTillNow = dimension * dimension - totalState;
             if (movesTillNow >= checkWinnerAfterMoves) {
                 winner = checkForWinner(gamePosition, coOrdinatePosition - 1, dimension);
+                if (Objects.nonNull(winner)) {
+                    return winner;
+                }
             }
 
-            System.out.println(playersTurn ? "Player A to play " :
-                    "" + (isStringEmptyAndBlank(machineName) ? "Player B to play enter position :" : "Machine "+machineName+" played ") + " ");
-            int status = Integer.MIN_VALUE;
-            if (isStringEmptyAndBlank(machineName)) {
+            System.out.println(playersTurn ? "Player A to play :" : isStringEmptyAndBlank(machineName)
+                    ? "Player B to play enter position :"
+                    : "Machine " + machineName + " played ");
+
+            if (!isStringEmptyAndBlank(machineName) && !playersTurn) {
+//                status = EasyBot.placeAtPosition(gamePosition, dimension);
+                status = placeAtPosition(gamePosition,
+                        getHardBotNextMove(gamePosition,dimension,totalState) - 1
+                        , dimension, playersTurn);
+            } else {
                 coOrdinatePosition = sc.nextInt();
                 status = placeAtPosition(gamePosition, coOrdinatePosition - 1, dimension, playersTurn);
-                if (movesTillNow >= checkWinnerAfterMoves) {
-                    winner = checkForWinner(gamePosition, coOrdinatePosition - 1, dimension);
-                }
-            } else {
-                if (!playersTurn) {
-                    status = EasyBot.placeAtPosition(gamePosition, coOrdinatePosition - 1, dimension, playersTurn);
-                    if (movesTillNow >= checkWinnerAfterMoves) {
-                        winner = checkForWinner(gamePosition, coOrdinatePosition - 1, dimension);
-                    }
-                }else{
-                    coOrdinatePosition = sc.nextInt();
-                    status = placeAtPosition(gamePosition, coOrdinatePosition - 1, dimension, playersTurn);
-                    if (movesTillNow >= checkWinnerAfterMoves) {
-                        winner = checkForWinner(gamePosition, coOrdinatePosition - 1, dimension);
-                    }
-                }
             }
+
             if (status == -1) {
                 System.out.println("already that position is filled please check the game status\n and place provide the untouched position");
             } else if (status == 0) {
-                if(isStringEmptyAndBlank(machineName)){
+                if (!isStringEmptyAndBlank(machineName)) {
                     System.out.println("Machine was not able to play the move,terminator got terminated.");
-                }else{
+                } else {
                     System.out.println("position is not correct choose between 1 To " + dimension * dimension);
                 }
             } else {
@@ -126,7 +117,7 @@ public class Main {
         }
 
         printCurrentState(gamePosition);
-
+        winner = "Both Lost";
         return winner;
     }
 
@@ -149,9 +140,9 @@ public class Main {
     }
 
     private static void printCurrentState(String[][] gamePosition) {
-        for (int row = 0; row < gamePosition.length; row++) {
+        for (String[] strings : gamePosition) {
             for (int col = 0; col < gamePosition[0].length; col++) {
-                System.out.print(gamePosition[row][col] + "  ");
+                System.out.print(strings[col] + "  ");
             }
             System.out.println();
         }
@@ -181,7 +172,6 @@ public class Main {
         } else if (oCountRow == dimension || oCountCol == dimension) {
             return "B";
         }
-
 
         xCountRow = 0;
         xCountCol = 0;
@@ -218,6 +208,61 @@ public class Main {
         }
 
         return null;
+    }
+
+    static int getHardBotNextMove(String[][] gamePosition, int dimension, int totalMovesLeft) {
+        int result = -1, calCol = -1, calRow = -1;
+        for (int row = 0; row < dimension; row++) {
+            for (int col = 0; col < dimension; col++) {
+                if (gamePosition[row][col].equals("-")) {
+                    int value = minMax(gamePosition, true, dimension, totalMovesLeft - 1, row, col);
+                    if(value > result) {
+                       calCol = col;
+                       calRow = row;
+                    }
+                }
+            }
+        }
+
+        return GameUtils.matrixToPositionCoOrdinates(calRow,calCol,dimension) ;
+    }
+
+    static int minMax(String[][] gamePosition, boolean isMax, int dimension
+            , int totalMovesLeft, int curRow, int curCol) {
+
+        if(totalMovesLeft < 1){
+            return 0;
+        }
+
+        gamePosition[curRow][curCol] = isMax ? "O" : "X";
+        int curCoOrdinatePosition = GameUtils.matrixToPositionCoOrdinates(curRow, curCol, dimension);
+        String winner = checkForWinner(gamePosition, curCoOrdinatePosition - 1, dimension);
+        if (Objects.nonNull(winner)) {
+            gamePosition[curRow][curCol] = "-";
+            if (winner.equals("B")) {
+                return 1;
+            } else if (winner.equals("A")) {
+                return -1;
+            }
+        }
+
+        int bestValue = 0;
+
+        for (int row = 0; row < dimension; row++) {
+            for (int col = 0; col < dimension; col++) {
+                if (gamePosition[row][col].equals("-")) {
+                    int value = minMax(gamePosition, !isMax, dimension, totalMovesLeft - 1, row, col);
+                    if (isMax) {
+                        bestValue = Math.max(bestValue,value);
+                    } else{
+                        bestValue = Math.min(bestValue,value);
+                    }
+                }
+            }
+        }
+
+        gamePosition[curRow][curCol] = "-";
+        return bestValue;
     }
 
 }

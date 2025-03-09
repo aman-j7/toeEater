@@ -2,25 +2,25 @@ package bots;
 
 public class EasyBot {
 
-    public static int placeAtPosition(String[][] gamePosition, int coOrdinatePosition, int dimension, boolean playerAToPlay) {
-        int majorDiagonalCount =0;
-        for(int i=0;i<dimension;i++){
-            if(gamePosition[i][i].equalsIgnoreCase("X")){
+    public static int placeAtPosition(String[][] gamePosition, int dimension) {
+        int majorDiagonalCount = 0;
+        for (int i = 0; i < dimension; i++) {
+            if (gamePosition[i][i].equalsIgnoreCase("X")) {
                 majorDiagonalCount++;
             }
         }
-        int minorDiagonalCount =0;
-        for(int i=0;i<dimension;i++){
-            if(gamePosition[dimension-i-1][i].equalsIgnoreCase("X")){
+        int minorDiagonalCount = 0;
+        for (int i = 0; i < dimension; i++) {
+            if (gamePosition[dimension - i - 1][i].equalsIgnoreCase("X")) {
                 minorDiagonalCount++;
             }
         }
-        if(majorDiagonalCount == (dimension-1)){
-            for(int i=0;i<dimension;i++){
-                for(int j=0;j<dimension;j++){
-                    if(i!=j){
-                        if(gamePosition[i][j].equalsIgnoreCase("-")){
-                            gamePosition[i][j]="O";
+        if (majorDiagonalCount == (dimension - 1)) {
+            for (int i = 0; i < dimension; i++) {
+                for (int j = 0; j < dimension; j++) {
+                    if (i != j) {
+                        if (gamePosition[i][j].equalsIgnoreCase("-")) {
+                            gamePosition[i][j] = "O";
                             return 1;
                         }
                     }
@@ -28,12 +28,12 @@ public class EasyBot {
             }
         }
 
-        if(minorDiagonalCount == (dimension-1)){
-            for(int i=0;i<dimension;i++){
-                for(int j=0;j<dimension;j++){
-                    if(!(i==(dimension-i-1))){
-                        if(gamePosition[i][j].equalsIgnoreCase("-")){
-                            gamePosition[i][j]="O";
+        if (minorDiagonalCount == (dimension - 1)) {
+            for (int i = 0; i < dimension; i++) {
+                for (int j = 0; j < dimension; j++) {
+                    if (!(i == (dimension - i - 1))) {
+                        if (gamePosition[i][j].equalsIgnoreCase("-")) {
+                            gamePosition[i][j] = "O";
                             return 1;
                         }
                     }
@@ -41,60 +41,55 @@ public class EasyBot {
             }
         }
 
-        int maxStreakInRow=-1;
+        int maxStreakInRow = -1;
         int rowMax = Integer.MIN_VALUE;
-        for(int i=0;i<dimension;i++){
+        for (int i = 0; i < dimension; i++) {
             int currentCount = 0;
-            for(int j=0;j<dimension;j++){
-                if(gamePosition[i][j].equalsIgnoreCase("X")){
+            for (int j = 0; j < dimension; j++) {
+                if (gamePosition[i][j].equalsIgnoreCase("X")) {
                     currentCount++;
                 }
             }
-            if(currentCount > rowMax){
+            if (currentCount > rowMax) {
                 rowMax = currentCount;
-                maxStreakInRow =i;
+                maxStreakInRow = i;
             }
         }
 
-        int maxStreakInCol=-1;
+        int maxStreakInCol = -1;
         int colMax = Integer.MIN_VALUE;
-        for(int i=0;i<dimension;i++){
+        for (int i = 0; i < dimension; i++) {
             int currentCount = 0;
-            for(int j=0;j<dimension;j++){
-                if(gamePosition[j][i].equalsIgnoreCase("X")){
+            for (int j = 0; j < dimension; j++) {
+                if (gamePosition[j][i].equalsIgnoreCase("X")) {
                     currentCount++;
                 }
             }
-            if(currentCount > colMax){
+            if (currentCount > colMax) {
                 colMax = currentCount;
-                maxStreakInCol =i;
+                maxStreakInCol = i;
             }
         }
-        int overAllMax = -1;
         int rowOrCol = -1;
-        if(rowMax>colMax){
-            overAllMax = rowMax;
+        if (rowMax > colMax) {
             rowOrCol = maxStreakInRow;
-            Outer:
-            for(int i=0;i<dimension;i++){
-                for(int j=0;j<dimension;j++){
-                    if(i!=rowOrCol){
-                        if(gamePosition[i][j].equalsIgnoreCase("-")){
-                            gamePosition[i][j]="O";
+            for (int i = 0; i < dimension; i++) {
+                for (int j = 0; j < dimension; j++) {
+                    if (i != rowOrCol) {
+                        if (gamePosition[i][j].equalsIgnoreCase("-")) {
+                            gamePosition[i][j] = "O";
                             return 1;
                         }
                     }
                 }
             }
-        }else{
-            overAllMax = colMax;
+        } else {
             rowOrCol = maxStreakInCol;
-            Outer:
-            for(int i=0;i<dimension;i++){
-                for(int j=0;j<dimension;j++){
-                    if(j!=rowOrCol){
-                        if(gamePosition[i][j].equalsIgnoreCase("-")){
-                            gamePosition[i][j]="O";
+            for (int i = 0; i < dimension; i++) {
+                for (int j = 0; j < dimension; j++) {
+                    if (j != rowOrCol) {
+                        if (gamePosition[i][j].equalsIgnoreCase("-")) {
+                            gamePosition[i][j] = "O";
                             return 1;
                         }
                     }
@@ -104,9 +99,3 @@ public class EasyBot {
         return 0;
     }
 }
-//1
-//9
-//2
-//3
-//4
-//6
